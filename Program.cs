@@ -1,16 +1,16 @@
 ﻿using System.Text;
 
-namespace CsFolderBundler;
+namespace CodeCollector;
 
 internal static class Program
 {
-    private static readonly HashSet<string> ExcludedDirNames = new(StringComparer.OrdinalIgnoreCase)
+    private static readonly HashSet<string> _ExcludedDirNames = new(StringComparer.OrdinalIgnoreCase)
     {
         "bin",
         "obj"
     };
 
-    private static int Main(string[] args)
+    private static void Main()
     {
         Console.OutputEncoding = Encoding.UTF8;
 
@@ -59,25 +59,19 @@ internal static class Program
                 }
             }
 
-            if (targetDirs.Count == 0)
-            {
-                Console.WriteLine("Нечего обрабатывать: список папок пуст.");
-                return 0;
-            }
+            if (targetDirs.Count == 0) Console.WriteLine("Нечего обрабатывать: список папок пуст.");
 
-            foreach (var dir in targetDirs)
-            {
-                ProcessDirectory(dir);
-            }
+            foreach (var dir in targetDirs) ProcessDirectory(dir);
 
             Console.WriteLine("Готово.");
-            return 0;
+            
         }
         catch (Exception ex)
         {
             Console.Error.WriteLine("Ошибка: " + ex);
-            return 1;
         }
+
+        Console.ReadKey();
     }
 
     private static void ProcessDirectory(DirectoryInfo dir)
@@ -89,6 +83,12 @@ internal static class Program
 
 
         var csFiles = EnumerateCsFilesSafe(dir.FullName).ToList();
+
+        if (csFiles.Count == 0)
+        {
+            Console.WriteLine($"[{dir.Name}] .cs файлов не найдено");
+            return;
+        }
 
         Console.WriteLine($"[{dir.Name}] найдено .cs файлов: {csFiles.Count}");
         Console.WriteLine($"[{dir.Name}] выходной файл: {outFilePath}");
@@ -169,6 +169,5 @@ internal static class Program
         }
     }
 
-    private static bool IsExcludedDir(string dirName)
-        => ExcludedDirNames.Contains(dirName);
+    private static bool IsExcludedDir(string dirName) => _ExcludedDirNames.Contains(dirName);
 }
